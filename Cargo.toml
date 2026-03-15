@@ -1,0 +1,15 @@
+[package]
+name = "kimi-proxy"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+actix-web = "4"
+reqwest = { version = "0.12", features = ["stream"] }
+tokio = { version = "1", features = ["full"] }
+actix-http = "3"
+futures = "0.3"
+
+[profile.release]
+opt-level = 3
+lto = true
