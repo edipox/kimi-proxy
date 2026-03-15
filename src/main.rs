@@ -1,5 +1,6 @@
-use actix_web::{body, http::header, middleware, web, App, HttpRequest, HttpResponse, HttpServer, Result};
-use futures::stream::{self, StreamExt};
+use actix_web::{http::header, http::Method, middleware, web, App, HttpRequest, HttpResponse, HttpServer, Result};
+use actix_web::web::Bytes;
+use futures::stream::StreamExt;
 use reqwest::Client;
 use std::net::SocketAddr;
 
@@ -104,7 +105,7 @@ async fn proxy_handler(
     // Stream the response body
     let stream = upstream_resp.bytes_stream().map(|result| {
         result
-            .map(|bytes| body::Bytes::from(bytes.to_vec()))
+            .map(|bytes| Bytes::from(bytes.to_vec()))
             .map_err(|e| {
                 log::error!("Stream error: {}", e);
                 actix_web::error::ErrorInternalServerError(e)
@@ -145,7 +146,7 @@ async fn main() -> std::io::Result<()> {
             .route("/{path:.*}", web::delete().to(proxy_handler))
             .route("/{path:.*}", web::patch().to(proxy_handler))
             .route("/{path:.*}", web::head().to(proxy_handler))
-            .route("/{path:.*}", web::options().to(proxy_handler))
+            .route("/{path:.*}", web::method(Method::OPTIONS).to(proxy_handler))
     })
     .bind(addr)?
     .run()
